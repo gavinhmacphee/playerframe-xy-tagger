@@ -21,20 +21,19 @@ fig.update_layout(
     yaxis=dict(range=[0, 68], showgrid=False, zeroline=False),
     height=600,
     width=900,
-    plot_bgcolor="#f5f5dc",
-    dragmode="closest"
+    plot_bgcolor="#f5f5dc"
 )
 fig.update_xaxes(scaleanchor="y", scaleratio=1)
 
-# Use Plotly's native clickData support
-chart = st.plotly_chart(fig, use_container_width=True, key="pitch", click_data=True)
+# Display chart & capture click data
+chart = st.plotly_chart(fig, use_container_width=True, key="pitch")
 
-# Get click data from Streamlit session state
+# Try to read click data (native Streamlit behavior)
 if st.session_state.get("pitch"):
-    click = st.session_state["pitch"]
-    if click and "points" in click:
-        x = click["points"][0]["x"]
-        y = click["points"][0]["y"]
+    click_data = st.session_state["pitch"]
+    if click_data and "points" in click_data:
+        x = click_data["points"][0]["x"]
+        y = click_data["points"][0]["y"]
         st.session_state.data.loc[len(st.session_state.data)] = [x, y, event_type]
 
 # Show tagged events
