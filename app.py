@@ -12,20 +12,30 @@ if "data" not in st.session_state:
 # Event type selection
 event_type = st.selectbox("Select Event Type", ["Pass", "Shot", "Goal", "Other"])
 
-# Create a FotMob-style pitch (105 x 68, bottom-left origin)
+# Create FotMob-style pitch (105 x 68)
 fig = go.Figure()
 
-# Pitch outline
+# Outer pitch outline
 fig.add_shape(type="rect", x0=0, y0=0, x1=105, y1=68,
               line=dict(color="black", width=3))
 
 # Halfway line
-fig.add_shape(type="line", x0=52.5, y0=0, x1=52.5, y1=68,
-              line=dict(color="black", width=2))
+fig.add_shape(type="line", x0=52.5, y0=0, x1=52.5, y1=68, line=dict(color="black", width=2))
 
 # Penalty boxes
-fig.add_shape(type="rect", x0=0, y0=13.84, x1=16.5, y1=54.16, line=dict(color="black"))
-fig.add_shape(type="rect", x0=105-16.5, y0=13.84, x1=105, y1=54.16, line=dict(color="black"))
+fig.add_shape(type="rect", x0=0, y0=(68-44.3)/2, x1=16.5, y1=(68+44.3)/2, line=dict(color="black"))
+fig.add_shape(type="rect", x0=105-16.5, y0=(68-44.3)/2, x1=105, y1=(68+44.3)/2, line=dict(color="black"))
+
+# Six-yard boxes
+fig.add_shape(type="rect", x0=0, y0=(68-18.32)/2, x1=5.5, y1=(68+18.32)/2, line=dict(color="black"))
+fig.add_shape(type="rect", x0=105-5.5, y0=(68-18.32)/2, x1=105, y1=(68+18.32)/2, line=dict(color="black"))
+
+# Center circle
+fig.add_shape(type="circle", x0=52.5-9.15, y0=34-9.15, x1=52.5+9.15, y1=34+9.15, line=dict(color="black"))
+
+# Penalty spots & center spot
+fig.add_trace(go.Scatter(x=[11, 105-11, 52.5], y=[34, 34, 34],
+                         mode="markers", marker=dict(color="black", size=5), showlegend=False))
 
 # Update layout
 fig.update_layout(
@@ -37,24 +47,25 @@ fig.update_layout(
 )
 fig.update_xaxes(scaleanchor="y", scaleratio=1)
 
-# Display pitch and capture clicks
-clicked = st.plotly_chart(fig, use_container_width=True, key="pitch", on_select="rerun")
+# Click logging
+clicked_point = st.plotly_chart(fig, use_container_width=True)
 
-# Capture clicks from session state (Streamlit workaround)
-if "plotly_click" not in st.session_state:
-    st.session_state.plotly_click = None
+# Handle clicks (Plotly + Streamlit workaround)
+if "clicked" not in st.session_state:
+    st.session_state.clicked = []
 
-clicked_data = st.session_state.get("plotly_click", None)
+if st.session_state.get("plotly_click") and "points" in st.session_state.plotly_click:
+    point = st.session_state.plotly_click["points"][0]
+    x, y = point["x"], point["y"]
+    st.session_state.data.loc[len(st.session_state.data)] = [x, y, event_type]
 
-# Streamlit can't directly track clicks without custom JS, so using a placeholder workaround
-st.write("Click logging will be updated after manual refresh if needed.")
-
-# Display table of tagged events
+# Display logged events
 st.subheader("Tagged Events")
 st.write(st.session_state.data)
 
-# Download CSV button
+# Download CSV
 if not st.session_state.data.empty:
     csv = st.session_state.data.to_csv(index=False).encode("utf-8")
     st.download_button("Download Tagged Events CSV", csv, "tagged_events.csv", "text/csv")
+
 
