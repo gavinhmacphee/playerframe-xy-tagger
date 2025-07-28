@@ -16,16 +16,15 @@ event_type = st.selectbox("Select Event Type", ["Pass", "Shot", "Goal", "Other"]
 # Create FotMob-style pitch (105 x 68)
 fig = go.Figure()
 
-# Pitch outline & lines
+# Pitch outline
 fig.add_shape(type="rect", x0=0, y0=0, x1=105, y1=68, line=dict(color="black", width=3))
+
+# Halfway line
 fig.add_shape(type="line", x0=52.5, y0=0, x1=52.5, y1=68, line=dict(color="black", width=2))
+
+# Simple penalty boxes
 fig.add_shape(type="rect", x0=0, y0=(68-44.3)/2, x1=16.5, y1=(68+44.3)/2, line=dict(color="black"))
 fig.add_shape(type="rect", x0=105-16.5, y0=(68-44.3)/2, x1=105, y1=(68+44.3)/2, line=dict(color="black"))
-fig.add_shape(type="rect", x0=0, y0=(68-18.32)/2, x1=5.5, y1=(68+18.32)/2, line=dict(color="black"))
-fig.add_shape(type="rect", x0=105-5.5, y0=(68-18.32)/2, x1=105, y1=(68+18.32)/2, line=dict(color="black"))
-fig.add_shape(type="circle", x0=52.5-9.15, y0=34-9.15, x1=52.5+9.15, y1=34+9.15, line=dict(color="black"))
-fig.add_trace(go.Scatter(x=[11, 105-11, 52.5], y=[34, 34, 34],
-                         mode="markers", marker=dict(color="black", size=5), showlegend=False))
 
 fig.update_layout(
     xaxis=dict(range=[0, 105], showgrid=False, zeroline=False, visible=False),
@@ -37,7 +36,7 @@ fig.update_layout(
 fig.update_xaxes(scaleanchor="y", scaleratio=1)
 
 # Capture clicks
-clicked_points = plotly_events(fig, click_event=True, hover_event=False, select_event=False, key="pitch")
+clicked_points = plotly_events(fig, click_event=True, hover_event=False, select_event=False)
 
 # Store clicked points in session state
 if clicked_points:
